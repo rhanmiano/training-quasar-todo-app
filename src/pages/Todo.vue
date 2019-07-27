@@ -11,11 +11,11 @@
 
         <div class="q-pa-sm">
             <div class="row items-center justify-center">
-                <div class="col-xs-12 col-sm-6 vertical-middle">
+                <div class="col-xs-12 col-sm-6 vertical-middle column">
                     <q-input class="q-mb-sm" @keyup.enter="addTodo"
                     v-model="newTodo" label="Task" />
                     <q-btn @click="addTodo" :disabled="!newTodo"
-                    color="white" text-color="black" side>Add</q-btn>
+                    color="white" text-color="black">Add</q-btn>
                 </div>
             </div>
 
@@ -53,9 +53,9 @@ export default {
   data() {
     return {
       todos: [
-        { id: 0, title: 'Item 1', completed: false },
-        { id: 1, title: 'Item 2', completed: false },
-        { id: 2, title: 'Item 3', completed: false },
+        { id: Math.random(), title: 'Item 1', completed: false },
+        { id: Math.random(), title: 'Item 2', completed: false },
+        { id: Math.random(), title: 'Item 3', completed: false },
       ],
       doneTodos: [],
       newTodo: '',
@@ -69,7 +69,7 @@ export default {
       }
 
       const item = {
-        id: this.todos.length,
+        id: Math.random(),
         title: todo,
         text: 'I am a text',
         completed: false,
@@ -82,7 +82,7 @@ export default {
     deleteTodo(id) {
       console.log(id);
       console.log(this.todos);
-    //   this.todos.splice(id, 1);
+      this.todos = this.todos.filter(value => value.id !== id);
     },
     doneTodo() {
     //   this.todos.splice();
