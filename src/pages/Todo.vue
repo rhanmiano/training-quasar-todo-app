@@ -10,6 +10,14 @@
         </q-toolbar>
 
         <div class="q-pa-sm">
+            <div class="row" items-center justify-center>
+                <div class="col-xs-12 column">
+                    <q-btn class="col-6" @click="showTasks"
+                    color="white" text-color="black">Todos</q-btn>
+                    <q-btn class="col-6" @click="showCompletedTasks"
+                    color="white" text-color="black">Completed</q-btn>
+                </div>
+            </div>
             <div class="row items-center justify-center">
                 <div class="col-xs-12 col-sm-6 vertical-middle column">
                     <q-input class="q-mb-sm" @keyup.enter="addTodo"
@@ -24,7 +32,8 @@
                     <h6>Todos</h6>
                     <q-item clickable v-ripple v-for="(todo, i) in todos" v-bind:key="i">
                         <q-item-section avatar>
-                            <q-checkbox @click="!todo.completed" v-model="todo.completed" />
+                            <q-checkbox @click.native="doneTodo(todo._id, todo)"
+                            :value="todo.completed" />
                         </q-item-section>
                     <q-item-section>
                         <q-item-label :class="{'strike-through': todo.completed }">
@@ -32,15 +41,10 @@
                         </q-item-label>
                     </q-item-section>
                         <q-item-section side>
-                            <q-btn @click="deleteTodo(todo.id)" icon="delete"
+                            <q-btn @click="deleteTodo(todo._id)" icon="delete"
                             color="negative" round size="sm"></q-btn>
                         </q-item-section>
                     </q-item>
-                </div>
-            </div>
-            <div class="row item-center justify-center">
-                <div class="col-xs-12 col-sm-6">
-                    <h6>Done Todos</h6>
                 </div>
             </div>
         </div>
@@ -50,13 +54,36 @@
 <script>
 export default {
   name: 'Todo',
+  mounted() {
+    const serviceName = 'todos';
+    const params = {
+      query: {
+        completed: false,
+      },
+    };
+    const config = {
+      channels: [
+        {
+          prop: 'completed',
+          value: false,
+        },
+      ],
+    };
+    const todosService = this.$dbCon.wingsService(serviceName, params, config);
+
+    this.todosService = todosService;
+
+    todosService.on('dataChange', (todos) => {
+      console.log('Hello', todos);
+      this.todos = todos;
+    });
+
+    todosService.init();
+  },
   data() {
     return {
-      todos: [
-        { id: Math.random(), title: 'Item 1', completed: false },
-        { id: Math.random(), title: 'Item 2', completed: false },
-        { id: Math.random(), title: 'Item 3', completed: false },
-      ],
+      todosService: null,
+      todos: [],
       doneTodos: [],
       newTodo: '',
     };
@@ -69,23 +96,59 @@ export default {
       }
 
       const item = {
-        id: Math.random(),
         title: todo,
-        text: 'I am a text',
         completed: false,
       };
 
-      this.todos.push(item);
+      this.$dbCon.services.todos.create(item);
 
       this.newTodo = '';
     },
     deleteTodo(id) {
-      console.log(id);
-      console.log(this.todos);
-      this.todos = this.todos.filter(value => value.id !== id);
+    //   console.log(id);
+    //   console.log(this.todos);
+    //   this.todos = this.todos.filter(value => value.id !== id);
+      this.$dbCon.services.todos.remove(id);
     },
-    doneTodo() {
-    //   this.todos.splice();
+    doneTodo(id, todo) {
+      console.log(id, todo);
+      this.$dbCon.services.todos.patch(id, {
+        completed: !todo.completed,
+      });
+    },
+    showCompletedTasks() {
+      const params = {
+        query: {
+          completed: true,
+        },
+      };
+      const config = {
+        channels: [
+          {
+            prop: 'completed',
+            value: false,
+          },
+        ],
+      };
+
+      this.todosService.reset(params, config);
+    },
+    showTasks() {
+      const params = {
+        query: {
+          completed: false,
+        },
+      };
+      const config = {
+        channels: [
+          {
+            prop: 'completed',
+            value: false,
+          },
+        ],
+      };
+
+      this.todosService.reset(params, config);
     },
   },
 };

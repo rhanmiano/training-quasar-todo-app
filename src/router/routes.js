@@ -7,6 +7,11 @@ const routes = [
       { path: '', component: () => import('pages/Index.vue') },
     ],
   },
+  {
+    path: '/charts',
+    component: () => import('pages/Charts.vue'),
+    children: [],
+  },
 ];
 
 // Always leave this as last one
