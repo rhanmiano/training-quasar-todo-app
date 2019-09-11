@@ -1,6 +1,6 @@
 <template>
     <pie-chart :donut="true"
-    :data="[['Remaining', completedTasks], ['Completed', remainingTasks]]">
+    :data="[['Remaining', completedTasksCount], ['Completed', remainingTasksCount]]">
     </pie-chart>
 </template>
 
@@ -28,8 +28,10 @@ export default {
 
     this.completedTasks = completedTasks;
 
-    completedTasks.on('dataChange', (todos) => {
-      console.log('Hello', todos);
+    completedTasks.on('dataChange', async () => {
+      this.completedTasksCount = (await this.completedTasks.find(
+        { query: { completed: true } },
+      )).total;
     });
 
     this.completedTasks = completedTasks.init();
@@ -53,9 +55,10 @@ export default {
 
     this.remainingTasks = remainingTasks;
 
-    remainingTasks.on('dataChange', (todos) => {
-      console.log('Hello', todos);
-      console.log('Total', todos.total);
+    remainingTasks.on('dataChange', async () => {
+      this.remainingTasksCount = (await this.remainingTasks.find(
+        { query: { completed: false } },
+      )).total;
     });
 
     this.remainingTasks = remainingTasks.init(
@@ -63,13 +66,15 @@ export default {
 
     console.log('R TAsks onInit', this.remainingTasks);
     console.log('C TAsks onInit', this.remainingTasks);
-    // console.log('Completed Tasks', this.completedTasks);
-    // console.log('Remaining Tasks', this.remainingTasks);
+    console.log('Completed Tasks', this.completedTasksCount);
+    console.log('Remaining Tasks', this.remainingTasksCount);
   },
   data() {
     return {
       completedTasks: null,
       remainingTasks: null,
+      completedTasksCount: null,
+      remainingTasksCount: null,
     };
   },
   methods: {
